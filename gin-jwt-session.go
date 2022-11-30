@@ -2,13 +2,14 @@ package session
 
 import (
 	"errors"
+	"sync"
+	"time"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/dgrijalva/jwt-go/request"
 	"github.com/gin-gonic/gin"
 	gorillaContext "github.com/gorilla/context"
 	"github.com/gorilla/sessions"
-	"sync"
-	"time"
 )
 
 const defaultShortName = "default"
@@ -47,8 +48,8 @@ func init() {
 	//TODO
 }
 
-//ClearMiddleware clear mem to avoid leak.
-//you should add this middleware at your main gin.router
+// ClearMiddleware clear mem to avoid leak.
+// you should add this middleware at your main gin.router
 //
 // Please see note from http://www.gorillatoolkit.org/pkg/sessions
 // Important Note: If you aren't using gorilla/mux,
@@ -62,30 +63,31 @@ func ClearMiddleware() gin.HandlerFunc {
 	}
 }
 
-//NewStore only create one session store globally
-//The main program need call sessions.NewStore() to initialize store
-//User also can set sessions var before call this function to adjust some default parameters
+// NewStore only create one session store globally
+// The main program need call sessions.NewStore() to initialize store
+// User also can set sessions var before call this function to adjust some default parameters
 //
-//Usage Sample:
-// 	//in your main(), setup session after r = gin.Default()
-// 	sessions.JwtTokenName = "YourJWTTokenName"                       //string without blank
-// 	sessions.DefaultSessionName = "YourDefaultSessionName"           //string without blank
-// 	sessions.DefaultFlashSessionName = "YourDefaultFlashSessionName" //string without blank
-// 	sessions.SecretKey = "Your Secerect Key (*&%(&*%$"               //string with any
-// 	sessions.NewStore()                                              //setup the session store
-// 	r.Use(sessions.ClearMiddleware())                                //important to avoid memory leak
-// 	//end setup session
+// Usage Sample:
+//
+//	//in your main(), setup session after r = gin.Default()
+//	sessions.JwtTokenName = "YourJWTTokenName"                       //string without blank
+//	sessions.DefaultSessionName = "YourDefaultSessionName"           //string without blank
+//	sessions.DefaultFlashSessionName = "YourDefaultFlashSessionName" //string without blank
+//	sessions.SecretKey = "Your Secerect Key (*&%(&*%$"               //string with any
+//	sessions.NewStore()                                              //setup the session store
+//	r.Use(sessions.ClearMiddleware())                                //important to avoid memory leak
+//	//end setup session
 func NewStore() {
 	once.Do(newStore)
 }
 
-//internal only
+// internal only
 func newStore() {
 	store = sessions.NewCookieStore([]byte(SecretKey))
 }
 
-//Message struct contain message you would like to set in session
-//usually you just provide Key and Value only
+// Message struct contain message you would like to set in session
+// usually you just provide Key and Value only
 type Message struct {
 	Key         interface{}
 	Value       interface{}
@@ -93,7 +95,7 @@ type Message struct {
 	Options     *sessions.Options
 }
 
-//Flash type to contain new flash and its session
+// Flash type to contain new flash and its session
 type Flash struct {
 	Flash       interface{}
 	SessionName string
@@ -103,21 +105,22 @@ type Flash struct {
 // Fields are a subset of http.Cookie fields.
 type Options = sessions.Options
 
-//SetMessage will set session into gin.Context per gived SesionMessage
-//It is the basic function for other set func to leverage
+// SetMessage will set session into gin.Context per gived SesionMessage
+// It is the basic function for other set func to leverage
 //
-//Usage Sample:
-//  err := sessions.SetMessage(c,
-// 	sessions.Message{
-// 		Key:   sessions.JwtTokenName,
-// 		Value: tokenString,
-// 		// SessionName: "",
-// 		// Options: &sessions.Options{
-// 		// 	Path:     "/",
-// 		// 	MaxAge:   3600 * 1, //1 hour for session. Btw, the token itself have valid period, so, better set it as same
-// 		// 	HttpOnly: true,
-// 		// },
-// 	})
+// Usage Sample:
+//
+//	 err := sessions.SetMessage(c,
+//		sessions.Message{
+//			Key:   sessions.JwtTokenName,
+//			Value: tokenString,
+//			// SessionName: "",
+//			// Options: &sessions.Options{
+//			// 	Path:     "/",
+//			// 	MaxAge:   3600 * 1, //1 hour for session. Btw, the token itself have valid period, so, better set it as same
+//			// 	HttpOnly: true,
+//			// },
+//		})
 func SetMessage(c *gin.Context, message Message) (err error) {
 	if len(message.SessionName) == 0 || message.SessionName == defaultShortName {
 		message.SessionName = DefaultSessionName
@@ -136,7 +139,7 @@ func SetMessage(c *gin.Context, message Message) (err error) {
 	return err
 }
 
-//SetSessionFlash set new flash to givied session
+// SetSessionFlash set new flash to givied session
 func SetSessionFlash(c *gin.Context, flash Flash) (err error) {
 	if len(flash.SessionName) == 0 || flash.SessionName == defaultShortName {
 		flash.SessionName = DefaultFlashSessionName
@@ -150,7 +153,7 @@ func SetSessionFlash(c *gin.Context, flash Flash) (err error) {
 	return err
 }
 
-//SetFlash set new flash to default session
+// SetFlash set new flash to default session
 func SetFlash(c *gin.Context, flash interface{}) (err error) {
 	return SetSessionFlash(c, Flash{
 		Flash:       flash,
@@ -158,7 +161,7 @@ func SetFlash(c *gin.Context, flash interface{}) (err error) {
 	})
 }
 
-//GetSessionFlashes return previously flashes per gived session
+// GetSessionFlashes return previously flashes per gived session
 func GetSessionFlashes(c *gin.Context, sessionName string) []interface{} {
 	if len(sessionName) == 0 || sessionName == defaultShortName {
 		sessionName = DefaultFlashSessionName
@@ -172,13 +175,13 @@ func GetSessionFlashes(c *gin.Context, sessionName string) []interface{} {
 	return flashes
 }
 
-//GetFlashes return previously flashes from default session
+// GetFlashes return previously flashes from default session
 func GetFlashes(c *gin.Context) []interface{} {
 	return GetSessionFlashes(c, DefaultFlashSessionName)
 }
 
-//DeleteSession delete a session
-//instead of Set, the delete will set MaxAge to -1
+// DeleteSession delete a session
+// instead of Set, the delete will set MaxAge to -1
 func DeleteSession(c *gin.Context, sessionName string) (err error) {
 	if len(sessionName) == 0 || sessionName == defaultShortName {
 		sessionName = DefaultSessionName
@@ -197,8 +200,8 @@ func DeleteSession(c *gin.Context, sessionName string) (err error) {
 	return err
 }
 
-//GetSessionValue session value according
-//The base get func, other will leverage this func
+// GetSessionValue session value according
+// The base get func, other will leverage this func
 func GetSessionValue(c *gin.Context, sessionName string, key interface{}) (value interface{}, err error) {
 	// Get a session. Get() always returns a session, even if empty.
 	if len(sessionName) == 0 {
@@ -212,7 +215,7 @@ func GetSessionValue(c *gin.Context, sessionName string, key interface{}) (value
 	return
 }
 
-//DeleteSessionValue try delete the gived session key value
+// DeleteSessionValue try delete the gived session key value
 func DeleteSessionValue(c *gin.Context, sessionName string, key interface{}) (err error) {
 	if len(sessionName) == 0 {
 		sessionName = DefaultSessionName
@@ -225,17 +228,17 @@ func DeleteSessionValue(c *gin.Context, sessionName string, key interface{}) (er
 	return nil
 }
 
-//Delete try delete default session key value
+// Delete try delete default session key value
 func Delete(c *gin.Context, key interface{}) (err error) {
 	return DeleteSessionValue(c, DefaultSessionName, key)
 }
 
-//GetDefaultSessionValue levarage GetSessionValue to get key value
+// GetDefaultSessionValue levarage GetSessionValue to get key value
 func GetDefaultSessionValue(c *gin.Context, key interface{}) (value interface{}, err error) {
 	return GetSessionValue(c, DefaultSessionName, key)
 }
 
-//GetString levarage Get to get key value and convert to string
+// GetString levarage Get to get key value and convert to string
 func GetString(c *gin.Context, key interface{}) (value string, err error) {
 	valueInterface, err := GetDefaultSessionValue(c, key)
 	if err != nil {
@@ -248,7 +251,7 @@ func GetString(c *gin.Context, key interface{}) (value string, err error) {
 	return value, err
 }
 
-//GetTokenString to get tokenString
+// GetTokenString to get tokenString
 func GetTokenString(c *gin.Context) (tokenString string, err error) {
 	valueInterface, err := GetSessionValue(c, JwtTokenName, JwtTokenName)
 	if err != nil {
@@ -262,7 +265,7 @@ func GetTokenString(c *gin.Context) (tokenString string, err error) {
 	return tokenString, err
 }
 
-//SetTokenString into JwtTokenSession
+// SetTokenString into JwtTokenSession
 func SetTokenString(c *gin.Context, tokenString string, seconds int) (err error) {
 	return SetMessage(c, Message{
 		Key:         JwtTokenName,
@@ -276,25 +279,25 @@ func SetTokenString(c *gin.Context, tokenString string, seconds int) (err error)
 	})
 }
 
-//DeleteTokenSession delete before generate JWT token string
+// DeleteTokenSession delete before generate JWT token string
 func DeleteTokenSession(c *gin.Context) (err error) {
 	return DeleteSession(c, JwtTokenName)
 }
 
-//DeleteNormalSession will delete DefaultSessionName and DefaultFlashSessionName
+// DeleteNormalSession will delete DefaultSessionName and DefaultFlashSessionName
 func DeleteNormalSession(c *gin.Context) {
 	DeleteSession(c, DefaultSessionName)
 	DeleteSession(c, DefaultFlashSessionName)
 }
 
-//DeleteAllSession will delete JwtTokenName/DefaultSessionName/DefaultFlashSessionName
-//usually used when user logout
+// DeleteAllSession will delete JwtTokenName/DefaultSessionName/DefaultFlashSessionName
+// usually used when user logout
 func DeleteAllSession(c *gin.Context) {
 	DeleteSession(c, JwtTokenName)
 	DeleteNormalSession(c)
 }
 
-//GetInt levarage Get to get key value and convert to int
+// GetInt levarage Get to get key value and convert to int
 func GetInt(c *gin.Context, key interface{}) (value int, err error) {
 	valueInterface, err := GetDefaultSessionValue(c, key)
 	if err != nil {
@@ -307,7 +310,7 @@ func GetInt(c *gin.Context, key interface{}) (value int, err error) {
 	return value, err
 }
 
-//Set set key value by interface
+// Set set key value by interface
 func Set(c *gin.Context, key, value interface{}) (err error) {
 	return SetMessage(c, Message{
 		Key:   key,
@@ -315,44 +318,44 @@ func Set(c *gin.Context, key, value interface{}) (err error) {
 	})
 }
 
-//GenerateJWTToken per gived username and token duration
+// GenerateJWTToken per gived username and token duration
 //
 // Claims example as below, and we only use below top 3 claims
-//   "iat": 1416797419, //start
-//   "exp": 1448333419, //end
-//   "sub": "jrocket@example.com",  //username
 //
-//   "iss": "Online JWT Builder",
-//   "aud": "www.example.com",
-//   "GivenName": "Johnny",
-//   "Surname": "Rocket",
-//   "Email": "jrocket@example.com",
-//   "Role": [ "Manager", "Project Administrator" ]
+//	"iat": 1416797419, //start
+//	"exp": 1448333419, //end
+//	"sub": "jrocket@example.com",  //username
 //
-func GenerateJWTToken(username string, tokenDuration time.Duration) (tokenString string, err error) {
+//	"iss": "Online JWT Builder",
+//	"aud": "www.example.com",
+//	"GivenName": "Johnny",
+//	"Surname": "Rocket",
+//	"Email": "jrocket@example.com",
+//	"Role": [ "Manager", "Project Administrator" ]
+func GenerateJWTToken(username string, userId string, tokenDuration time.Duration) (tokenString string, err error) {
 	//start generate jwt token
 	token := jwt.New(jwt.SigningMethodHS256)
 	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(tokenDuration).Unix()
-	claims["iat"] = time.Now().Unix()
-	claims["sub"] = username
-	//claims["email"] = form.Email
+	claims[`exp`] = time.Now().Add(tokenDuration).Unix()
+	claims[`iat`] = time.Now().Unix()
+	claims[`sub`] = username
+	claims[`uid`] = userId
 	token.Claims = claims
 	tokenString, err = token.SignedString([]byte(SecretKey))
 	return tokenString, err
 }
 
-//ValidateJWTToken valide JWT per headder firstly
-//And then try get from session if above failed
-//will return valid username in case no err
-//username == "" also mean failed
+// ValidateJWTToken valide JWT per headder firstly
+// And then try get from session if above failed
+// will return valid username in case no err
+// username == "" also mean failed
 func ValidateJWTToken(c *gin.Context) (username string, err error) {
 	//get username firstly
 	username = ""
 
 	//then try valid token
 	tokenString := c.Request.Header.Get("Authorization")
-	if "" == tokenString {
+	if tokenString == `` {
 		//Not in header authorization, try get cookie in case header empty
 		tokenString, err = GetTokenString(c)
 		if err != nil {

@@ -2,16 +2,18 @@ package main
 
 import (
 	"context"
-	"github.com/ScottHuangZL/gin-jwt-session"
-	"github.com/ScottHuangZL/gin-jwt-session/example/controllers"
-	"github.com/ScottHuangZL/gin-jwt-session/example/models"
-	"github.com/gin-gonic/gin"
+	"gin-jwt-session/example/controllers"
 	"html/template"
 	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+
+	session "github.com/mfeilen/gin-jwt-session"
+	model "github.com/mfeilen/gin-jwt-session/example/models"
+
+	"github.com/gin-gonic/gin"
 )
 
 func main() {

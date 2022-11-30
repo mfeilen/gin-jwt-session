@@ -1,7 +1,7 @@
 # gin-jwt-session
 
-[![GoDoc](https://godoc.org/github.com/ScottHuangZL/gin-jwt-session?status.png)](http://godoc.org/github.com/ScottHuangZL/gin-jwt-session)
-[![Go Report](https://goreportcard.com/badge/github.com/ScottHuangZL/gin-jwt-session)](https://goreportcard.com/report/github.com/ScottHuangZL/gin-jwt-session)
+[![GoDoc](https://godoc.org/github.com/mfeilen/gin-jwt-session?status.png)](http://godoc.org/github.com/mfeilen/gin-jwt-session)
+[![Go Report](https://goreportcard.com/badge/github.com/mfeilen/gin-jwt-session)](https://goreportcard.com/report/github.com/mfeilen/gin-jwt-session)
 
 ## Description
 
@@ -27,21 +27,21 @@ Go 1.6 or above.
 Run the following command to install the package:
 
 ```
-go get github.com/ScottHuangZL/gin-jwt-session
+go get github.com/mfeilen/gin-jwt-session
 ```
 
 ## Getting Started
 
-As for example please refer to [gin-jwt-session-example](https://github.com/ScottHuangZL/gin-jwt-session/tree/master/example). 
+As for example please refer to [gin-jwt-session-example](https://github.com/mfeilen/gin-jwt-session/tree/master/example). 
 
 ```go
 package main
 
 import (
 	"context"
-	"github.com/ScottHuangZL/gin-jwt-session"
-	"github.com/ScottHuangZL/gin-jwt-session/example/controllers"
-	"github.com/ScottHuangZL/gin-jwt-session/example/models"
+	"github.com/mfeilen/gin-jwt-session"
+	"github.com/mfeilen/gin-jwt-session/example/controllers"
+	"github.com/mfeilen/gin-jwt-session/example/models"
 	"github.com/gin-gonic/gin"
 	"html/template"
 	"log"
@@ -122,8 +122,8 @@ func setupRouter(r *gin.Engine) {
 package controllers
 
 import (
-	"github.com/ScottHuangZL/gin-jwt-session"
-	"github.com/ScottHuangZL/gin-jwt-session/example/models"
+	"github.com/mfeilen/gin-jwt-session"
+	"github.com/mfeilen/gin-jwt-session/example/models"
 	"github.com/gin-gonic/gin"
 	// "log"
 	"net/http"
@@ -219,3 +219,4 @@ func SomeCookiesHandler(c *gin.Context) {
 gin-jwt-session backend leverage 
 [github.com/gorilla/sessions](https://github.com/gorilla/sessions)
 [github.com/dgrijalva/jwt-go](https://github.com/gorilla/sessions)
+forked from [github.com/ScottHuangZL/gin-jwt-session](https://github.com/ScottHuangZL/gin-jwt-session)

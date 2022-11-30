@@ -1,5 +1,5 @@
 [deps]
-github.com/ScottHuangZL/gin-jwt-session = 
+github.com/mfeilen/gin-jwt-session = 
 github.com/gin-gonic/gin = 
 
 [res]

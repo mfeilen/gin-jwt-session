@@ -1,15 +1,16 @@
 package controllers
 
 import (
-	"github.com/ScottHuangZL/gin-jwt-session"
-	"github.com/ScottHuangZL/gin-jwt-session/example/models"
 	"github.com/gin-gonic/gin"
+	session "github.com/mfeilen/gin-jwt-session"
+	model "github.com/mfeilen/gin-jwt-session/example/models"
+
 	// "log"
 	"net/http"
 	"time"
 )
 
-//LoginHandler for login page , it also can use for logout since it delete all stored session
+// LoginHandler for login page , it also can use for logout since it delete all stored session
 func LoginHandler(c *gin.Context) {
 	flashes := session.GetFlashes(c)
 	session.DeleteAllSession(c)
@@ -20,8 +21,8 @@ func LoginHandler(c *gin.Context) {
 
 }
 
-//HomeHandler is the home handler
-//will show home page, also according login/logout action to navigate
+// HomeHandler is the home handler
+// will show home page, also according login/logout action to navigate
 func HomeHandler(c *gin.Context) {
 	// action := strings.ToLower(c.Param("action"))
 	// path := strings.ToLower(c.Request.URL.Path)
@@ -41,7 +42,7 @@ func HomeHandler(c *gin.Context) {
 	})
 }
 
-//ValidateJwtLoginHandler validate the login and redirect to correct link
+// ValidateJwtLoginHandler validate the login and redirect to correct link
 func ValidateJwtLoginHandler(c *gin.Context) {
 	var form model.Login
 	//try get login info
@@ -76,7 +77,7 @@ func ValidateJwtLoginHandler(c *gin.Context) {
 	return
 }
 
-//SomeCookiesHandler show cookie example
+// SomeCookiesHandler show cookie example
 func SomeCookiesHandler(c *gin.Context) {
 	session.Set(c, "hello", "world")
 	sessionMessage, _ := session.GetString(c, "hello")
@@ -88,5 +89,5 @@ func SomeCookiesHandler(c *gin.Context) {
 		"session message":                 sessionMessage,
 		"session new message":             message2,
 		"session read again after delete": readAgain,
-		"status": http.StatusOK})
+		"status":                          http.StatusOK})
 }
